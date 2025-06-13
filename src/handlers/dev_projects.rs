@@ -20,14 +20,14 @@ use crate::{database, models::*, AppState};
     get,
     path = "/dev-projects",
     responses(
-        (status = 200, description = "List of development projects", body = [DevProjectMetadata]),
+        (status = 200, description = "List of development projects", body = [Dev_Project_Metadata]),
         (status = 500, description = "Internal server error")
     ),
     tag = "Development Projects"
 )]
 pub async fn get_dev_projects(
     State(state): State<AppState>,
-) -> Result<Json<Vec<DevProjectMetadata>>, StatusCode> {
+) -> Result<Json<Vec<Dev_Project_Metadata>>, StatusCode> {
     match database::get_all_dev_projects(&state.db).await {
         Ok(projects) => Ok(Json(projects)),
         Err(e) => {
@@ -44,7 +44,7 @@ pub async fn get_dev_projects(
     get,
     path = "/dev-projects/{slug}",
     responses(
-        (status = 200, description = "Development project details", body = DevProjectMetadata),
+        (status = 200, description = "Development project details", body = Dev_Project_Metadata),
         (status = 404, description = "Project not found"),
         (status = 500, description = "Internal server error")
     ),
@@ -56,7 +56,7 @@ pub async fn get_dev_projects(
 pub async fn get_dev_project(
     State(state): State<AppState>,
     Path(slug): Path<String>,
-) -> Result<Json<DevProjectMetadata>, StatusCode> {
+) -> Result<Json<Dev_Project_Metadata>, StatusCode> {
     match database::get_dev_project_by_slug(&state.db, &slug).await {
         Ok(Some(project)) => Ok(Json(project)),
         Ok(None) => Err(StatusCode::NOT_FOUND),
@@ -103,8 +103,8 @@ pub async fn create_dev_project(
         }
     }
 
-    // Convert request to DevProjectMetadata
-    let project = DevProjectMetadata {
+    // Convert request to Dev_Project_Metadata
+    let project = Dev_Project_Metadata {
         slug: request.slug.clone(),
         en_title: request.en_title,
         en_short_description: request.en_short_description,

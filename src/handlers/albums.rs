@@ -23,14 +23,14 @@ use crate::{database, models::*, AppState};
     get,
     path = "/albums",
     responses(
-        (status = 200, description = "List of photo albums", body = [AlbumMetadata]),
+        (status = 200, description = "List of photo albums", body = [Album_Metadata]),
         (status = 500, description = "Internal server error")
     ),
     tag = "Photo Albums"
 )]
 pub async fn get_albums(
     State(state): State<AppState>,
-) -> Result<Json<Vec<AlbumMetadata>>, StatusCode> {
+) -> Result<Json<Vec<Album_Metadata>>, StatusCode> {
     match database::get_all_albums(&state.db).await {
         Ok(albums) => Ok(Json(albums)),
         Err(e) => {
@@ -106,8 +106,8 @@ pub async fn create_album(
         }
     }
 
-    // Convert request to AlbumMetadata
-    let album = AlbumMetadata {
+    // Convert request to Album_Metadata
+    let album = Album_Metadata {
         slug: request.slug.clone(),
         title: request.title,
         description: request.description,
@@ -226,7 +226,7 @@ pub async fn create_album_with_files(
     }
 
     // Create album
-    let album = AlbumMetadata {
+    let album = Album_Metadata {
         slug: album_request.slug.clone(),
         title: album_request.title,
         description: album_request.description,
@@ -296,7 +296,7 @@ pub async fn create_album_with_files(
         let img_path = format!("uploads/{}/{}", album_request.slug, unique_filename);
 
         // Add to album content
-        let content = AlbumContent {
+        let content = Album_Content {
             slug: album_request.slug.clone(),
             img_url: img_url.clone(),
             caption: format!("Photo from {}", filename),
@@ -572,7 +572,7 @@ pub async fn add_photos_to_album(
         let img_path = format!("uploads/{}/{}", slug, unique_filename);
 
         // Add to album content
-        let content = AlbumContent {
+        let content = Album_Content {
             slug: slug.clone(),
             img_url: img_url.clone(),
             caption: default_caption.clone(),

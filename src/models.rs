@@ -13,7 +13,7 @@ use utoipa::ToSchema;
     "date": "2025-06-13",
     "tags": "web,backend,api"
 }))]
-pub struct DevProjectMetadata {
+pub struct Dev_Project_Metadata {
     pub slug: String,
     pub en_title: String,
     pub en_short_description: String,
@@ -39,7 +39,7 @@ pub struct DevProjectMetadata {
     "feature": true,
     "category": "Street"
 }))]
-pub struct AlbumMetadata {
+pub struct Album_Metadata {
     pub slug: String,
     pub title: String,
     pub description: String,
@@ -60,7 +60,7 @@ pub struct AlbumMetadata {
     "caption": "Street art in downtown",
     "img_path": "uploads/urban-exploration/street1.jpg"
 }))]
-pub struct AlbumContent {
+pub struct Album_Content {
     pub slug: String,
     pub img_url: String,
     pub caption: String,
@@ -71,8 +71,8 @@ pub struct AlbumContent {
 pub struct AlbumWithContent {
     #[serde(flatten)]
     #[schema(inline)]
-    pub metadata: AlbumMetadata,
-    pub content: Vec<AlbumContent>,
+    pub metadata: Album_Metadata,
+    pub content: Vec<Album_Content>,
 }
 
 /// Form data for file upload
@@ -320,7 +320,7 @@ pub struct AddPhotosResponse {
     pub album_slug: String,
     
     /// List of photos that were added
-    pub added_photos: Vec<AlbumContent>,
+    pub added_photos: Vec<Album_Content>,
 }
 
 /// Request to remove a photo from an album

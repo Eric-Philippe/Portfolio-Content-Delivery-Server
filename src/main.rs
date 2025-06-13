@@ -38,7 +38,7 @@ use sqlx::postgres::PgPool;
         handlers::files::delete_folder,
     ),
     components(
-        schemas(DevProjectMetadata, CreateDevProjectRequest, UpdateDevProjectRequest, ProjectOperationResponse, AlbumMetadata, AlbumContent, AlbumWithContent, CreateAlbumRequest, UpdateAlbumRequest, AlbumOperationResponse, CreateAlbumWithFilesFormData, AddPhotosToAlbumFormData, AddPhotosResponse, RemovePhotoRequest, UploadFormData, UploadResponse, UploadedFileInfo, DeleteResponse)
+        schemas(Dev_Project_Metadata, CreateDevProjectRequest, UpdateDevProjectRequest, ProjectOperationResponse, Album_Metadata, Album_Content, AlbumWithContent, CreateAlbumRequest, UpdateAlbumRequest, AlbumOperationResponse, CreateAlbumWithFilesFormData, AddPhotosToAlbumFormData, AddPhotosResponse, RemovePhotoRequest, UploadFormData, UploadResponse, UploadedFileInfo, DeleteResponse)
     ),
     modifiers(&SecurityAddon),
     tags(

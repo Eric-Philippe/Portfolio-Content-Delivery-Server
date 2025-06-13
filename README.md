@@ -48,7 +48,7 @@ SERVER_HOST=127.0.0.1
 SERVER_PORT=3000
 
 # Database
-DATABASE_URL=postgresql://portfolio_user:portfolio_password@localhost:5432/portfolio_db
+DATABASE_URL=postgresql://portfolio_user:portfolio_password@localhost:5432/portfolio
 
 # Upload directory
 UPLOAD_DIR=./uploads
@@ -67,7 +67,7 @@ RUST_LOG=info
 1. Open your SQL client
 2. New data source → PostgreSQL
 3. Host: `localhost`, Port: `5432`
-4. Database: `portfolio_db`
+4. Database: `portfolio`
 5. User: `portfolio_user`, Password: `portfolio_password`
 
 ### Setting up PostgreSQL
@@ -85,9 +85,9 @@ brew services start postgresql
 
 # Create database and user
 sudo -u postgres psql
-CREATE DATABASE portfolio_db;
+CREATE DATABASE portfolio;
 CREATE USER portfolio_user WITH PASSWORD 'portfolio_password';
-GRANT ALL PRIVILEGES ON DATABASE portfolio_db TO portfolio_user;
+GRANT ALL PRIVILEGES ON DATABASE portfolio TO portfolio_user;
 \q
 ```
 
@@ -95,7 +95,7 @@ GRANT ALL PRIVILEGES ON DATABASE portfolio_db TO portfolio_user;
 
 ```sql
 -- Development projects
-DevProjectMetadata (
+Dev_Project_Metadata (
     slug VARCHAR(255) PRIMARY KEY,
     en_title VARCHAR(500) NOT NULL,
     en_short_description TEXT NOT NULL,
@@ -108,7 +108,7 @@ DevProjectMetadata (
 )
 
 -- Photo albums
-AlbumMetadata (
+Album_Metadata (
     slug VARCHAR(255) PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
     description TEXT NOT NULL,
@@ -123,13 +123,13 @@ AlbumMetadata (
 )
 
 -- Album content
-AlbumContent (
+Album_Content (
     slug VARCHAR(255) NOT NULL,
     img_url VARCHAR(1000) NOT NULL,
     caption TEXT NOT NULL,
     img_path VARCHAR(1000) NOT NULL,
     PRIMARY KEY (slug, img_url),
-    FOREIGN KEY (slug) REFERENCES AlbumMetadata(slug) ON DELETE CASCADE
+    FOREIGN KEY (slug) REFERENCES Album_Metadata(slug) ON DELETE CASCADE
 )
 ```
 
