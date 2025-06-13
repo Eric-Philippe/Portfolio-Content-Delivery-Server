@@ -32,6 +32,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/Eric-Philippe/portfolio-content-provider:latest
+          tags: ghcr.io/eric-philippe/portfolio-content-provider:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
