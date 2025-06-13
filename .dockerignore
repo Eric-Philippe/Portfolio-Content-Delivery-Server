@@ -1,0 +1,65 @@
+# Docker ignore file for Portfolio Server
+
+# Rust build artifacts
+
+target/
+Cargo.lock
+
+# Environment files (contain secrets)
+
+.env
+.env.local
+.env.production
+
+# Database files (should be persisted via volumes)
+
+data/
+_.db
+_.db-\*
+
+# Upload directory (should be persisted via volumes)
+
+uploads/
+
+# IDE and editor files
+
+.vscode/
+.idea/
+_.swp
+_.swo
+\*~
+
+# OS generated files
+
+.DS*Store
+.DS_Store?
+.*\*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+
+\*.log
+logs/
+
+# Docker files (to avoid infinite recursion)
+
+Dockerfile*
+docker-compose*.yml
+
+# Git
+
+.git/
+.gitignore
+
+# Documentation
+
+README.md
+\*.md
+
+# Backup files
+
+_.bak
+_.backup
