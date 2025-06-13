@@ -7,8 +7,7 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
     // Get database URL from environment or use default
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgresql://portfolio_user:portfolio_password@localhost:5432/portfolio".to_string());
-    
-    let pool = PgPool::connect(&database_url).await?;    // Create tables
+      let pool = PgPool::connect(&database_url).await?;    // Create tables
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS Dev_Project_Metadata (
@@ -20,9 +19,16 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
             techs TEXT NOT NULL,
             link VARCHAR(1000) NOT NULL,
             date VARCHAR(50) NOT NULL,
-            tags TEXT NOT NULL
+            tags TEXT NOT NULL,            priority INT DEFAULT 0
         )
         "#,
+    )
+    .execute(&pool)
+    .await?;
+
+    // Add priority column if it doesn't exist (for existing databases)
+    sqlx::query(
+        "ALTER TABLE Dev_Project_Metadata ADD COLUMN IF NOT EXISTS priority INT DEFAULT 0"
     )
     .execute(&pool)
     .await?;
@@ -70,8 +76,8 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
     if dev_count == 0 {        info!("Inserting sample dev projects...");
         sqlx::query(
             "INSERT INTO Dev_Project_Metadata 
-            (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+            (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags, priority) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
         )
         .bind("portfolio-server")
         .bind("Portfolio Server")
@@ -82,13 +88,14 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
         .bind("https://github.com/username/portfolio-server")
         .bind("2025-06-13")
         .bind("web,backend,api")
+        .bind(1)
         .execute(&pool)
         .await?;
 
         sqlx::query(
             "INSERT INTO Dev_Project_Metadata 
-            (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+            (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags, priority) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
         )
         .bind("photo-gallery")
         .bind("Photo Gallery App")
@@ -99,6 +106,7 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
         .bind("https://github.com/username/photo-gallery")
         .bind("2025-05-20")
         .bind("frontend,react,photography")
+        .bind(2)
         .execute(&pool)
         .await?;
 
@@ -139,7 +147,7 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
 }
 
 pub async fn get_all_dev_projects(pool: &PgPool) -> Result<Vec<Dev_Project_Metadata>, sqlx::Error> {
-    let rows = sqlx::query("SELECT * FROM Dev_Project_Metadata ORDER BY date DESC")
+    let rows = sqlx::query("SELECT * FROM Dev_Project_Metadata ORDER BY priority ASC, date DESC")
         .fetch_all(pool)
         .await?;
 
@@ -155,6 +163,7 @@ pub async fn get_all_dev_projects(pool: &PgPool) -> Result<Vec<Dev_Project_Metad
             link: row.get("link"),
             date: row.get("date"),
             tags: row.get("tags"),
+            priority: row.get("priority"),
         })
         .collect();
 
@@ -168,9 +177,7 @@ pub async fn get_dev_project_by_slug(
     let row = sqlx::query("SELECT * FROM Dev_Project_Metadata WHERE slug = $1")
         .bind(slug)
         .fetch_optional(pool)
-        .await?;
-
-    if let Some(row) = row {
+        .await?;    if let Some(row) = row {
         Ok(Some(Dev_Project_Metadata {
             slug: row.get("slug"),
             en_title: row.get("en_title"),
@@ -181,6 +188,7 @@ pub async fn get_dev_project_by_slug(
             link: row.get("link"),
             date: row.get("date"),
             tags: row.get("tags"),
+            priority: row.get("priority"),
         }))
     } else {
         Ok(None)
@@ -264,8 +272,8 @@ pub async fn create_dev_project(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO Dev_Project_Metadata 
-        (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+        (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags, priority) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
     )
     .bind(&project.slug)
     .bind(&project.en_title)
@@ -276,6 +284,7 @@ pub async fn create_dev_project(
     .bind(&project.link)
     .bind(&project.date)
     .bind(&project.tags)
+    .bind(project.priority)
     .execute(pool)
     .await?;
 
@@ -291,8 +300,8 @@ pub async fn update_dev_project(
     let result = sqlx::query(
         "UPDATE Dev_Project_Metadata 
         SET en_title = $1, en_short_description = $2, fr_title = $3, fr_short_description = $4, 
-            techs = $5, link = $6, date = $7, tags = $8 
-        WHERE slug = $9"
+            techs = $5, link = $6, date = $7, tags = $8, priority = $9 
+        WHERE slug = $10"
     )
     .bind(&project.en_title)
     .bind(&project.en_short_description)
@@ -302,6 +311,7 @@ pub async fn update_dev_project(
     .bind(&project.link)
     .bind(&project.date)
     .bind(&project.tags)
+    .bind(project.priority)
     .bind(slug)
     .execute(pool)
     .await?;

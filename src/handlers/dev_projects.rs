@@ -101,9 +101,7 @@ pub async fn create_dev_project(
             error!("Failed to check existing project: {}", e);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
-    }
-
-    // Convert request to Dev_Project_Metadata
+    }    // Convert request to Dev_Project_Metadata
     let project = Dev_Project_Metadata {
         slug: request.slug.clone(),
         en_title: request.en_title,
@@ -114,6 +112,7 @@ pub async fn create_dev_project(
         link: request.link,
         date: request.date,
         tags: request.tags,
+        priority: request.priority.unwrap_or(0),
     };
 
     match database::create_dev_project(&state.db, &project).await {
@@ -187,9 +186,11 @@ pub async fn update_dev_project(
     }
     if let Some(date) = request.date {
         existing_project.date = date;
-    }
-    if let Some(tags) = request.tags {
+    }    if let Some(tags) = request.tags {
         existing_project.tags = tags;
+    }
+    if let Some(priority) = request.priority {
+        existing_project.priority = priority;
     }
 
     match database::update_dev_project(&state.db, &slug, &existing_project).await {

@@ -1,9 +1,9 @@
 -- Sample data to test the server
 
 -- Development projects
-INSERT INTO Dev_Project_Metadata (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) VALUES 
-('portfolio-server', 'Portfolio Server', 'A lightweight Rust server for portfolio content', 'Serveur Portfolio', 'Un serveur Rust léger pour le contenu de portfolio', 'Rust,Axum,PostgreSQL', 'https://github.com/username/portfolio-server', '2025-06-13', 'web,backend,api'),
-('photo-gallery', 'Photo Gallery App', 'Modern photo gallery with responsive design', 'Application Galerie Photo', 'Galerie photo moderne avec design responsive', 'React,TypeScript,Tailwind', 'https://github.com/username/photo-gallery', '2025-05-20', 'frontend,react,photography');
+INSERT INTO Dev_Project_Metadata (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags, priority) VALUES 
+('portfolio-server', 'Portfolio Server', 'A lightweight Rust server for portfolio content', 'Serveur Portfolio', 'Un serveur Rust léger pour le contenu de portfolio', 'Rust,Axum,PostgreSQL', 'https://github.com/username/portfolio-server', '2025-06-13', 'web,backend,api', 1),
+('photo-gallery', 'Photo Gallery App', 'Modern photo gallery with responsive design', 'Application Galerie Photo', 'Galerie photo moderne avec design responsive', 'React,TypeScript,Tailwind', 'https://github.com/username/photo-gallery', '2025-05-20', 'frontend,react,photography', 2);
 
 -- Photo albums
 INSERT INTO Album_Metadata (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, feature, category) VALUES 

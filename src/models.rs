@@ -11,7 +11,8 @@ use utoipa::ToSchema;
     "techs": "Rust,Axum,PostgreSQL",
     "link": "https://github.com/username/portfolio-server",
     "date": "2025-06-13",
-    "tags": "web,backend,api"
+    "tags": "web,backend,api",
+    "priority": 1
 }))]
 pub struct Dev_Project_Metadata {
     pub slug: String,
@@ -23,6 +24,7 @@ pub struct Dev_Project_Metadata {
     pub link: String,
     pub date: String,
     pub tags: String,
+    pub priority: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -158,7 +160,8 @@ pub struct DeleteResponse {
     "techs": "Rust,JavaScript,Python",
     "link": "https://github.com/username/new-project",
     "date": "2025-06-13",
-    "tags": "web,api,tools"
+    "tags": "web,api,tools",
+    "priority": 1
 }))]
 pub struct CreateDevProjectRequest {
     pub slug: String,
@@ -170,6 +173,7 @@ pub struct CreateDevProjectRequest {
     pub link: String,
     pub date: String,
     pub tags: String,
+    pub priority: Option<i32>,
 }
 
 /// Input data for updating a development project
@@ -178,7 +182,8 @@ pub struct CreateDevProjectRequest {
 #[schema(example = json!({
     "en_title": "Updated Project Title",
     "en_short_description": "Updated project description",
-    "techs": "Rust,TypeScript,React"
+    "techs": "Rust,TypeScript,React",
+    "priority": 2
 }))]
 pub struct UpdateDevProjectRequest {
     pub en_title: Option<String>,
@@ -189,6 +194,7 @@ pub struct UpdateDevProjectRequest {
     pub link: Option<String>,
     pub date: Option<String>,
     pub tags: Option<String>,
+    pub priority: Option<i32>,
 }
 
 /// Response for project creation/update operations
