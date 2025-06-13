@@ -250,21 +250,6 @@ docker run -d \
 - **Health checks** for container monitoring
 - **Persistent volumes** for data and uploads
 - **Alpine Linux** base for minimal footprint
-- **Optional Nginx reverse proxy** for production
-
-#### Production Setup with Nginx
-
-Uncomment the nginx service in `docker-compose.yml` for:
-
-- Rate limiting
-- SSL termination
-- Static file caching
-- Security headers
-
-```bash
-# Enable nginx reverse proxy
-docker-compose up -d nginx
-```
 
 ## Advanced Features
 
