@@ -1,31 +1,38 @@
-FROM lukemathwalker/cargo-chef:latest as chef
+# Build stage
+FROM rust:1.87-alpine AS builder
 WORKDIR /app
 
-FROM chef AS planner
-COPY ./Cargo.toml ./Cargo.lock ./
-COPY ./src ./src
-RUN cargo chef prepare
+# Install build dependencies
+RUN apk add --no-cache musl-dev postgresql-dev
 
-FROM chef AS builder
-COPY --from=planner /app/recipe.json .
-RUN cargo chef cook --release
-COPY . .
-RUN cargo build --release
-RUN ls -l ./target/release
-RUN mv ./target/release/portfolio-server ./app
+# Copy dependency files first for better caching
+COPY Cargo.toml Cargo.lock ./
 
-FROM debian:stable-slim AS runtime
+# Create a dummy main.rs to build dependencies
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+
+# Build dependencies (this layer will be cached if Cargo.toml doesn't change)
+RUN cargo build --release && rm -rf src target/release/deps/portfolio*
+
+# Copy source code
+COPY src ./src
+
+# Build the application with optimizations
+RUN cargo build --release --locked \
+    && strip target/release/portfolio-server
+
+# Runtime stage - ultra lightweight
+FROM alpine:3.19 AS runtime
 WORKDIR /app
 
-# Install CA certificates for HTTPS connections and PostgreSQL client if needed
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+# Install only essential runtime dependencies
+RUN apk add --no-cache ca-certificates libgcc postgresql-client
 
-COPY --from=builder /app/app /usr/local/bin/
+# Create uploads directory with proper permissions
+RUN mkdir -p /uploads && chmod 755 /uploads
 
-# Create the uploads directory
-RUN mkdir -p /uploads
+# Copy the binary from builder stage
+COPY --from=builder /app/target/release/portfolio-server /usr/local/bin/app
+RUN chmod +x /usr/local/bin/app
 
 ENTRYPOINT ["/usr/local/bin/app"]
