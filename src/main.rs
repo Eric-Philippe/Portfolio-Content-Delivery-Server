@@ -16,7 +16,7 @@ pub mod database;
 use handlers::*;
 use models::*;
 use database::init_database;
-use sqlx::sqlite::SqlitePool;
+use sqlx::postgres::PgPool;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -84,7 +84,7 @@ impl utoipa::Modify for SecurityAddon {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub db: SqlitePool,
+    pub db: PgPool,
     pub upload_dir: PathBuf,
 }
 

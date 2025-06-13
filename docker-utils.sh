@@ -114,7 +114,7 @@ status() {
 # Run database initialization
 init_db() {
     print_status "Initializing database with sample data..."
-    docker-compose exec portfolio-server sqlite3 ./data/portfolio.db < ./sample_data.sql
+    docker-compose exec postgres psql -U portfolio_user -d portfolio_db < ./sample_data.sql
     print_status "Database initialized with sample data!"
 }
 
@@ -126,11 +126,10 @@ backup() {
     print_status "Creating backup in $BACKUP_DIR..."
     
     # Backup database
-    docker-compose exec portfolio-server cp ./data/portfolio.db ./data/portfolio_backup.db
-    docker cp "$(docker-compose ps -q portfolio-server):/app/data/portfolio_backup.db" "$BACKUP_DIR/"
+    docker-compose exec postgres pg_dump -U portfolio_user portfolio_db > "$BACKUP_DIR/portfolio_db_backup.sql"
     
     # Backup uploads
-    docker cp "$(docker-compose ps -q portfolio-server):/app/uploads" "$BACKUP_DIR/"
+    docker cp "$(docker-compose ps -q portfolio-server):/uploads" "$BACKUP_DIR/"
     
     print_status "Backup completed: $BACKUP_DIR"
 }

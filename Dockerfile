@@ -16,10 +16,14 @@ RUN mv ./target/release/portfolio-server ./app
 
 FROM debian:stable-slim AS runtime
 WORKDIR /app
-COPY --from=builder /app/app /usr/local/bin/
 
-# Create the portfolio.db in the data/ directory
-RUN mkdir -p /app/data && touch /app/data/portfolio.db
+# Install CA certificates for HTTPS connections and PostgreSQL client if needed
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/app /usr/local/bin/
 
 # Create the uploads directory
 RUN mkdir -p /uploads

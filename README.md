@@ -2,13 +2,13 @@
 
 A lightweight Rust server to manage and serve your portfolio content (development projects and photo albums).
 
-> This super lightweight server is designed to serve as a content provider for my portfolio website. Like this I can easily manage my photo hosting, the albums and development projects without needing a full CMS or complex backend. It provides a simple REST API to retrieve projects and albums, supports file uploads with automatic thumbnail generation, and uses SQLite for data storage everything under secure and efficient conditions.
+> This super lightweight server is designed to serve as a content provider for my portfolio website. Like this I can easily manage my photo hosting, the albums and development projects without needing a full CMS or complex backend. It provides a simple REST API to retrieve projects and albums, supports file uploads with automatic thumbnail generation, and uses PostgreSQL for data storage everything under secure and efficient conditions.
 
 ## Features
 
 - **Simple REST API** to retrieve projects and albums
 - **File upload** with automatic thumbnail generation for images
-- **SQLite database** easily accessible with DataGrip or any SQL client
+- **PostgreSQL database** with robust relational features
 - **Integrated static file server** with thumbnail support
 - **CORS enabled** for frontend integration
 - **Environment variable configuration**
@@ -47,9 +47,8 @@ Copy `.env.example` to `.env` and modify according to your needs:
 SERVER_HOST=127.0.0.1
 SERVER_PORT=3000
 
-# Database (uses SQLite in memory by default)
-DATABASE_URL=sqlite:./data/portfolio.db  # Persistent file
-# DATABASE_URL=sqlite::memory:           # In-memory database (for tests)
+# Database
+DATABASE_URL=postgresql://portfolio_user:portfolio_password@localhost:5432/portfolio_db
 
 # Upload directory
 UPLOAD_DIR=./uploads
@@ -66,46 +65,69 @@ RUST_LOG=info
 ### Connection with DataGrip/DBeaver
 
 1. Open your SQL client
-2. New data source → SQLite
-3. Database file: `data/portfolio.db` (according to your config)
+2. New data source → PostgreSQL
+3. Host: `localhost`, Port: `5432`
+4. Database: `portfolio_db`
+5. User: `portfolio_user`, Password: `portfolio_password`
+
+### Setting up PostgreSQL
+
+Before running the server, make sure PostgreSQL is installed and running:
+
+```bash
+# On Ubuntu/Debian
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+
+# On macOS with Homebrew
+brew install postgresql
+brew services start postgresql
+
+# Create database and user
+sudo -u postgres psql
+CREATE DATABASE portfolio_db;
+CREATE USER portfolio_user WITH PASSWORD 'portfolio_password';
+GRANT ALL PRIVILEGES ON DATABASE portfolio_db TO portfolio_user;
+\q
+```
 
 ### Database Schema
 
 ```sql
 -- Development projects
 DevProjectMetadata (
-    slug TEXT PRIMARY KEY,
-    en_title TEXT NOT NULL,
+    slug VARCHAR(255) PRIMARY KEY,
+    en_title VARCHAR(500) NOT NULL,
     en_short_description TEXT NOT NULL,
-    fr_title TEXT NOT NULL,
+    fr_title VARCHAR(500) NOT NULL,
     fr_short_description TEXT NOT NULL,
     techs TEXT NOT NULL,
-    link TEXT NOT NULL,
-    date TEXT NOT NULL,
+    link VARCHAR(1000) NOT NULL,
+    date VARCHAR(50) NOT NULL,
     tags TEXT NOT NULL
 )
 
 -- Photo albums
 AlbumMetadata (
-    slug TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
+    slug VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
     description TEXT NOT NULL,
-    short_title TEXT NOT NULL,
-    date TEXT NOT NULL,
-    camera TEXT,
-    lens TEXT,
-    phone TEXT,
-    preview_img_one_url TEXT NOT NULL,
+    short_title VARCHAR(200) NOT NULL,
+    date VARCHAR(50) NOT NULL,
+    camera VARCHAR(200),
+    lens VARCHAR(200),
+    phone VARCHAR(200),
+    preview_img_one_url VARCHAR(1000) NOT NULL,
     feature BOOLEAN NOT NULL DEFAULT FALSE,
-    category TEXT NOT NULL
+    category VARCHAR(100) NOT NULL
 )
 
 -- Album content
 AlbumContent (
-    slug TEXT NOT NULL,
-    img_url TEXT NOT NULL,
+    slug VARCHAR(255) NOT NULL,
+    img_url VARCHAR(1000) NOT NULL,
     caption TEXT NOT NULL,
-    img_path TEXT NOT NULL,
+    img_path VARCHAR(1000) NOT NULL,
     PRIMARY KEY (slug, img_url),
     FOREIGN KEY (slug) REFERENCES AlbumMetadata(slug) ON DELETE CASCADE
 )
@@ -261,8 +283,8 @@ docker run -d \
 
 ## Recommended Workflow
 
-1. **Development**: Use in-memory database (`sqlite::memory:`)
-2. **Testing**: Local file database (`sqlite:./test.db`)
-3. **Production**: Persistent file database with backups
+1. **Development**: Use local PostgreSQL instance with test database
+2. **Testing**: Local PostgreSQL database (`postgresql://localhost:5432/test_db`)
+3. **Production**: Remote PostgreSQL instance with proper backup strategy
 
-The server is optimized to be **ultra-lightweight** and **simple to deploy**. Perfect for a personal portfolio with low traffic.
+The server is optimized to be **ultra-lightweight** and **simple to deploy**. Perfect for a personal portfolio with low traffic while benefiting from PostgreSQL's robust features and performance.

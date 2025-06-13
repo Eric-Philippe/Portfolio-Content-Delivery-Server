@@ -8,7 +8,7 @@ use utoipa::ToSchema;
     "en_short_description": "A lightweight Rust server for portfolio content",
     "fr_title": "Serveur Portfolio",
     "fr_short_description": "Un serveur Rust léger pour le contenu de portfolio",
-    "techs": "Rust,Axum,SQLite",
+    "techs": "Rust,Axum,PostgreSQL",
     "link": "https://github.com/username/portfolio-server",
     "date": "2025-06-13",
     "tags": "web,backend,api"

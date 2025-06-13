@@ -1,45 +1,25 @@
-use sqlx::{sqlite::SqlitePool, Row};
+use sqlx::{postgres::PgPool, Row};
 use tracing::info;
 
 use crate::models::*;
 
-pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
-    // Get database URL from environment or use default with file-based database
+pub async fn init_database() -> Result<PgPool, sqlx::Error> {
+    // Get database URL from environment or use default
     let database_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "sqlite:./data/portfolio.db".to_string());
+        .unwrap_or_else(|_| "postgresql://portfolio_user:portfolio_password@localhost:5432/portfolio_db".to_string());
     
-    // Create directories if using file-based database
-    if database_url.starts_with("sqlite:") && !database_url.contains(":memory:") {
-        // Handle both sqlite:path and sqlite://path formats
-        let db_path = if let Some(path) = database_url.strip_prefix("sqlite://") {
-            path
-        } else if let Some(path) = database_url.strip_prefix("sqlite:") {
-            path
-        } else {
-            return Err(sqlx::Error::Configuration("Invalid DATABASE_URL format".into()));
-        };
-        
-        if let Some(parent) = std::path::Path::new(db_path).parent() {
-            tokio::fs::create_dir_all(parent).await.map_err(|e| {
-                sqlx::Error::Configuration(format!("Failed to create database directory: {}", e).into())
-            })?;
-        }
-    }
-    
-    let pool = SqlitePool::connect(&database_url).await?;
-
-    // Create tables
+    let pool = PgPool::connect(&database_url).await?;    // Create tables
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS DevProjectMetadata (
-            slug TEXT PRIMARY KEY,
-            en_title TEXT NOT NULL,
+            slug VARCHAR(255) PRIMARY KEY,
+            en_title VARCHAR(500) NOT NULL,
             en_short_description TEXT NOT NULL,
-            fr_title TEXT NOT NULL,
+            fr_title VARCHAR(500) NOT NULL,
             fr_short_description TEXT NOT NULL,
             techs TEXT NOT NULL,
-            link TEXT NOT NULL,
-            date TEXT NOT NULL,
+            link VARCHAR(1000) NOT NULL,
+            date VARCHAR(50) NOT NULL,
             tags TEXT NOT NULL
         )
         "#,
@@ -50,17 +30,17 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS AlbumMetadata (
-            slug TEXT PRIMARY KEY,
-            title TEXT NOT NULL,
+            slug VARCHAR(255) PRIMARY KEY,
+            title VARCHAR(500) NOT NULL,
             description TEXT NOT NULL,
-            short_title TEXT NOT NULL,
-            date TEXT NOT NULL,
-            camera TEXT,
-            lens TEXT,
-            phone TEXT,
-            preview_img_one_url TEXT NOT NULL,
+            short_title VARCHAR(200) NOT NULL,
+            date VARCHAR(50) NOT NULL,
+            camera VARCHAR(200),
+            lens VARCHAR(200),
+            phone VARCHAR(200),
+            preview_img_one_url VARCHAR(1000) NOT NULL,
             feature BOOLEAN NOT NULL DEFAULT FALSE,
-            category TEXT NOT NULL
+            category VARCHAR(100) NOT NULL
         )
         "#,
     )
@@ -70,10 +50,10 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS AlbumContent (
-            slug TEXT NOT NULL,
-            img_url TEXT NOT NULL,
+            slug VARCHAR(255) NOT NULL,
+            img_url VARCHAR(1000) NOT NULL,
             caption TEXT NOT NULL,
-            img_path TEXT NOT NULL,
+            img_path VARCHAR(1000) NOT NULL,
             PRIMARY KEY (slug, img_url),
             FOREIGN KEY (slug) REFERENCES AlbumMetadata(slug) ON DELETE CASCADE
         )
@@ -87,19 +67,18 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
         .fetch_one(&pool)
         .await?;
 
-    if dev_count == 0 {
-        info!("Inserting sample dev projects...");
+    if dev_count == 0 {        info!("Inserting sample dev projects...");
         sqlx::query(
             "INSERT INTO DevProjectMetadata 
             (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
         )
         .bind("portfolio-server")
         .bind("Portfolio Server")
         .bind("A lightweight Rust server for portfolio content")
         .bind("Serveur Portfolio")
         .bind("Un serveur Rust léger pour le contenu de portfolio")
-        .bind("Rust,Axum,SQLite")
+        .bind("Rust,Axum,PostgreSQL")
         .bind("https://github.com/username/portfolio-server")
         .bind("2025-06-13")
         .bind("web,backend,api")
@@ -109,7 +88,7 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
         sqlx::query(
             "INSERT INTO DevProjectMetadata 
             (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
         )
         .bind("photo-gallery")
         .bind("Photo Gallery App")
@@ -126,7 +105,7 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
         sqlx::query(
             "INSERT INTO AlbumMetadata 
             (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, feature, category) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
         )
         .bind("urban-exploration")
         .bind("Urban Exploration 2025")
@@ -143,7 +122,7 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
         .await?;
 
         sqlx::query(
-            "INSERT INTO AlbumContent (slug, img_url, caption, img_path) VALUES (?, ?, ?, ?)"
+            "INSERT INTO AlbumContent (slug, img_url, caption, img_path) VALUES ($1, $2, $3, $4)"
         )
         .bind("urban-exploration")
         .bind("/files/urban-exploration/street1.jpg")
@@ -159,7 +138,7 @@ pub async fn init_database() -> Result<SqlitePool, sqlx::Error> {
     Ok(pool)
 }
 
-pub async fn get_all_dev_projects(pool: &SqlitePool) -> Result<Vec<DevProjectMetadata>, sqlx::Error> {
+pub async fn get_all_dev_projects(pool: &PgPool) -> Result<Vec<DevProjectMetadata>, sqlx::Error> {
     let rows = sqlx::query("SELECT * FROM DevProjectMetadata ORDER BY date DESC")
         .fetch_all(pool)
         .await?;
@@ -183,10 +162,10 @@ pub async fn get_all_dev_projects(pool: &SqlitePool) -> Result<Vec<DevProjectMet
 }
 
 pub async fn get_dev_project_by_slug(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
 ) -> Result<Option<DevProjectMetadata>, sqlx::Error> {
-    let row = sqlx::query("SELECT * FROM DevProjectMetadata WHERE slug = ?")
+    let row = sqlx::query("SELECT * FROM DevProjectMetadata WHERE slug = $1")
         .bind(slug)
         .fetch_optional(pool)
         .await?;
@@ -208,7 +187,7 @@ pub async fn get_dev_project_by_slug(
     }
 }
 
-pub async fn get_all_albums(pool: &SqlitePool) -> Result<Vec<AlbumMetadata>, sqlx::Error> {
+pub async fn get_all_albums(pool: &PgPool) -> Result<Vec<AlbumMetadata>, sqlx::Error> {
     let rows = sqlx::query("SELECT * FROM AlbumMetadata ORDER BY date DESC")
         .fetch_all(pool)
         .await?;
@@ -234,11 +213,11 @@ pub async fn get_all_albums(pool: &SqlitePool) -> Result<Vec<AlbumMetadata>, sql
 }
 
 pub async fn get_album_with_content(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
 ) -> Result<Option<AlbumWithContent>, sqlx::Error> {
     // Get album metadata
-    let album_row = sqlx::query("SELECT * FROM AlbumMetadata WHERE slug = ?")
+    let album_row = sqlx::query("SELECT * FROM AlbumMetadata WHERE slug = $1")
         .bind(slug)
         .fetch_optional(pool)
         .await?;
@@ -256,10 +235,8 @@ pub async fn get_album_with_content(
             preview_img_one_url: album_row.get("preview_img_one_url"),
             feature: album_row.get("feature"),
             category: album_row.get("category"),
-        };
-
-        // Get album content
-        let content_rows = sqlx::query("SELECT * FROM AlbumContent WHERE slug = ?")
+        };        // Get album content
+        let content_rows = sqlx::query("SELECT * FROM AlbumContent WHERE slug = $1")
             .bind(slug)
             .fetch_all(pool)
             .await?;
@@ -282,13 +259,13 @@ pub async fn get_album_with_content(
 
 /// Create a new development project
 pub async fn create_dev_project(
-    pool: &SqlitePool,
+    pool: &PgPool,
     project: &DevProjectMetadata,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO DevProjectMetadata 
         (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
     )
     .bind(&project.slug)
     .bind(&project.en_title)
@@ -307,15 +284,15 @@ pub async fn create_dev_project(
 
 /// Update an existing development project
 pub async fn update_dev_project(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
     project: &DevProjectMetadata,
 ) -> Result<bool, sqlx::Error> {
     let result = sqlx::query(
         "UPDATE DevProjectMetadata 
-        SET en_title = ?, en_short_description = ?, fr_title = ?, fr_short_description = ?, 
-            techs = ?, link = ?, date = ?, tags = ? 
-        WHERE slug = ?"
+        SET en_title = $1, en_short_description = $2, fr_title = $3, fr_short_description = $4, 
+            techs = $5, link = $6, date = $7, tags = $8 
+        WHERE slug = $9"
     )
     .bind(&project.en_title)
     .bind(&project.en_short_description)
@@ -334,10 +311,10 @@ pub async fn update_dev_project(
 
 /// Delete a development project
 pub async fn delete_dev_project(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
 ) -> Result<bool, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM DevProjectMetadata WHERE slug = ?")
+    let result = sqlx::query("DELETE FROM DevProjectMetadata WHERE slug = $1")
         .bind(slug)
         .execute(pool)
         .await?;
@@ -347,13 +324,13 @@ pub async fn delete_dev_project(
 
 /// Create a new album
 pub async fn create_album(
-    pool: &SqlitePool,
+    pool: &PgPool,
     album: &AlbumMetadata,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO AlbumMetadata 
         (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, feature, category) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
     )
     .bind(&album.slug)
     .bind(&album.title)
@@ -374,15 +351,15 @@ pub async fn create_album(
 
 /// Update an existing album
 pub async fn update_album(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
     album: &AlbumMetadata,
 ) -> Result<bool, sqlx::Error> {
     let result = sqlx::query(
         "UPDATE AlbumMetadata 
-        SET title = ?, description = ?, short_title = ?, date = ?, camera = ?, lens = ?, 
-            phone = ?, preview_img_one_url = ?, feature = ?, category = ? 
-        WHERE slug = ?"
+        SET title = $1, description = $2, short_title = $3, date = $4, camera = $5, lens = $6, 
+            phone = $7, preview_img_one_url = $8, feature = $9, category = $10 
+        WHERE slug = $11"
     )
     .bind(&album.title)
     .bind(&album.description)
@@ -403,20 +380,20 @@ pub async fn update_album(
 
 /// Delete an album and all its content
 pub async fn delete_album(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
 ) -> Result<bool, sqlx::Error> {
     // Start a transaction to ensure both operations succeed or fail together
     let mut tx = pool.begin().await?;
 
     // Delete album content first (due to foreign key constraint)
-    sqlx::query("DELETE FROM AlbumContent WHERE slug = ?")
+    sqlx::query("DELETE FROM AlbumContent WHERE slug = $1")
         .bind(slug)
         .execute(&mut *tx)
         .await?;
 
     // Delete album metadata
-    let result = sqlx::query("DELETE FROM AlbumMetadata WHERE slug = ?")
+    let result = sqlx::query("DELETE FROM AlbumMetadata WHERE slug = $1")
         .bind(slug)
         .execute(&mut *tx)
         .await?;
@@ -428,11 +405,11 @@ pub async fn delete_album(
 
 /// Add content to an album
 pub async fn add_album_content(
-    pool: &SqlitePool,
+    pool: &PgPool,
     content: &AlbumContent,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "INSERT INTO AlbumContent (slug, img_url, caption, img_path) VALUES (?, ?, ?, ?)"
+        "INSERT INTO AlbumContent (slug, img_url, caption, img_path) VALUES ($1, $2, $3, $4)"
     )
     .bind(&content.slug)
     .bind(&content.img_url)
@@ -446,11 +423,11 @@ pub async fn add_album_content(
 
 /// Remove specific content from an album
 pub async fn remove_album_content(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
     img_url: &str,
 ) -> Result<bool, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM AlbumContent WHERE slug = ? AND img_url = ?")
+    let result = sqlx::query("DELETE FROM AlbumContent WHERE slug = $1 AND img_url = $2")
         .bind(slug)
         .bind(img_url)
         .execute(pool)
@@ -461,10 +438,10 @@ pub async fn remove_album_content(
 
 /// Check if an album exists
 pub async fn album_exists(
-    pool: &SqlitePool,
+    pool: &PgPool,
     slug: &str,
 ) -> Result<bool, sqlx::Error> {
-    let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM AlbumMetadata WHERE slug = ?")
+    let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM AlbumMetadata WHERE slug = $1")
         .bind(slug)
         .fetch_one(pool)
         .await?;

@@ -2,7 +2,7 @@
 
 -- Development projects
 INSERT INTO DevProjectMetadata (slug, en_title, en_short_description, fr_title, fr_short_description, techs, link, date, tags) VALUES 
-('portfolio-server', 'Portfolio Server', 'A lightweight Rust server for portfolio content', 'Serveur Portfolio', 'Un serveur Rust léger pour le contenu de portfolio', 'Rust,Axum,SQLite', 'https://github.com/username/portfolio-server', '2025-06-13', 'web,backend,api'),
+('portfolio-server', 'Portfolio Server', 'A lightweight Rust server for portfolio content', 'Serveur Portfolio', 'Un serveur Rust léger pour le contenu de portfolio', 'Rust,Axum,PostgreSQL', 'https://github.com/username/portfolio-server', '2025-06-13', 'web,backend,api'),
 ('photo-gallery', 'Photo Gallery App', 'Modern photo gallery with responsive design', 'Application Galerie Photo', 'Galerie photo moderne avec design responsive', 'React,TypeScript,Tailwind', 'https://github.com/username/photo-gallery', '2025-05-20', 'frontend,react,photography');
 
 -- Photo albums
