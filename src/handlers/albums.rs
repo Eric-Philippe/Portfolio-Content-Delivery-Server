@@ -23,14 +23,14 @@ use crate::{database, models::*, AppState};
     get,
     path = "/albums",
     responses(
-        (status = 200, description = "List of photo albums", body = [Album_Metadata]),
+        (status = 200, description = "List of photo albums with their content", body = [AlbumWithContent]),
         (status = 500, description = "Internal server error")
     ),
     tag = "Photo Albums"
 )]
 pub async fn get_albums(
     State(state): State<AppState>,
-) -> Result<Json<Vec<Album_Metadata>>, StatusCode> {
+) -> Result<Json<Vec<AlbumWithContent>>, StatusCode> {
     match database::get_all_albums(&state.db).await {
         Ok(albums) => Ok(Json(albums)),
         Err(e) => {

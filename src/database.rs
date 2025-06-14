@@ -193,15 +193,18 @@ pub async fn get_dev_project_by_slug(
     }
 }
 
-pub async fn get_all_albums(pool: &PgPool) -> Result<Vec<Album_Metadata>, sqlx::Error> {
+pub async fn get_all_albums(pool: &PgPool) -> Result<Vec<AlbumWithContent>, sqlx::Error> {
+    // Fetch all album metadata
     let rows = sqlx::query("SELECT * FROM Album_Metadata ORDER BY date DESC")
         .fetch_all(pool)
         .await?;
 
-    let albums = rows
-        .into_iter()
-        .map(|row| Album_Metadata {
-            slug: row.get("slug"),
+    let mut albums_with_content = Vec::new();
+
+    for row in rows {
+        let slug: String = row.get("slug");
+        let metadata = Album_Metadata {
+            slug: slug.clone(),
             title: row.get("title"),
             description: row.get("description"),
             short_title: row.get("short_title"),
@@ -212,10 +215,27 @@ pub async fn get_all_albums(pool: &PgPool) -> Result<Vec<Album_Metadata>, sqlx::
             preview_img_one_url: row.get("preview_img_one_url"),
             featured: row.get("featured"),
             category: row.get("category"),
-        })
-        .collect();
+        };
 
-    Ok(albums)
+        // Fetch content for this album
+        let content_rows = sqlx::query("SELECT * FROM Album_Content WHERE slug = $1")
+            .bind(&slug)
+            .fetch_all(pool)
+            .await?;
+
+        let content = content_rows
+            .into_iter()
+            .map(|row| Album_Content {
+                slug: row.get("slug"),
+                img_url: row.get("img_url"),
+                caption: row.get("caption"),
+            })
+            .collect();
+
+        albums_with_content.push(AlbumWithContent { metadata, content });
+    }
+
+    Ok(albums_with_content)
 }
 
 pub async fn get_album_with_content(

@@ -142,7 +142,7 @@ Album_Content (
 
 ### Photo Albums
 
-- `GET /albums` - List all albums
+- `GET /albums` - List all albums (with their content)
 - `GET /albums/{slug}` - Album with its content
 
 ### File Upload
