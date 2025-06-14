@@ -118,7 +118,7 @@ Album_Metadata (
     lens VARCHAR(200),
     phone VARCHAR(200),
     preview_img_one_url VARCHAR(1000) NOT NULL,
-    feature BOOLEAN NOT NULL DEFAULT FALSE,
+    featured BOOLEAN NOT NULL DEFAULT FALSE,
     category VARCHAR(100) NOT NULL
 )
 

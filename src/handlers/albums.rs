@@ -117,7 +117,7 @@ pub async fn create_album(
         lens: request.lens,
         phone: request.phone,
         preview_img_one_url: request.preview_img_one_url,
-        feature: request.feature,
+        featured: request.featured,
         category: request.category,
     };
 
@@ -236,7 +236,7 @@ pub async fn create_album_with_files(
         lens: album_request.lens,
         phone: album_request.phone,
         preview_img_one_url: album_request.preview_img_one_url,
-        feature: album_request.feature,
+        featured: album_request.featured,
         category: album_request.category,
     };
 
@@ -380,8 +380,8 @@ pub async fn update_album(
     if let Some(preview_img_one_url) = request.preview_img_one_url {
         existing_album.preview_img_one_url = preview_img_one_url;
     }
-    if let Some(feature) = request.feature {
-        existing_album.feature = feature;
+    if let Some(featured) = request.featured {
+        existing_album.featured = featured;
     }
     if let Some(category) = request.category {
         existing_album.category = category;

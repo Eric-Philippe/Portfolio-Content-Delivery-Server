@@ -45,7 +45,7 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
             lens VARCHAR(200),
             phone VARCHAR(200),
             preview_img_one_url VARCHAR(1000) NOT NULL,
-            feature BOOLEAN NOT NULL DEFAULT FALSE,
+            featured BOOLEAN NOT NULL DEFAULT FALSE,
             category VARCHAR(100) NOT NULL
         )
         "#,
@@ -111,7 +111,7 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
 
         sqlx::query(
             "INSERT INTO Album_Metadata 
-            (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, feature, category) 
+            (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, featured, category) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
         )
         .bind("urban-exploration")
@@ -210,7 +210,7 @@ pub async fn get_all_albums(pool: &PgPool) -> Result<Vec<Album_Metadata>, sqlx::
             lens: row.get("lens"),
             phone: row.get("phone"),
             preview_img_one_url: row.get("preview_img_one_url"),
-            feature: row.get("feature"),
+            featured: row.get("featured"),
             category: row.get("category"),
         })
         .collect();
@@ -239,7 +239,7 @@ pub async fn get_album_with_content(
             lens: album_row.get("lens"),
             phone: album_row.get("phone"),
             preview_img_one_url: album_row.get("preview_img_one_url"),
-            feature: album_row.get("feature"),
+            featured: album_row.get("featured"),
             category: album_row.get("category"),
         };        // Get album content
         let content_rows = sqlx::query("SELECT * FROM Album_Content WHERE slug = $1")
@@ -336,7 +336,7 @@ pub async fn create_album(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO Album_Metadata 
-        (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, feature, category) 
+        (slug, title, description, short_title, date, camera, lens, phone, preview_img_one_url, featured, category) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
     )
     .bind(&album.slug)
@@ -348,7 +348,7 @@ pub async fn create_album(
     .bind(&album.lens)
     .bind(&album.phone)
     .bind(&album.preview_img_one_url)
-    .bind(album.feature)
+    .bind(album.featured)
     .bind(&album.category)
     .execute(pool)
     .await?;
@@ -365,7 +365,7 @@ pub async fn update_album(
     let result = sqlx::query(
         "UPDATE Album_Metadata 
         SET title = $1, description = $2, short_title = $3, date = $4, camera = $5, lens = $6, 
-            phone = $7, preview_img_one_url = $8, feature = $9, category = $10 
+            phone = $7, preview_img_one_url = $8, featured = $9, category = $10 
         WHERE slug = $11"
     )
     .bind(&album.title)
@@ -376,7 +376,7 @@ pub async fn update_album(
     .bind(&album.lens)
     .bind(&album.phone)
     .bind(&album.preview_img_one_url)
-    .bind(album.feature)
+    .bind(album.featured)
     .bind(&album.category)
     .bind(slug)
     .execute(pool)

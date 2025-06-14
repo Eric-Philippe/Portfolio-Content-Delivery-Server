@@ -38,7 +38,7 @@ pub struct Dev_Project_Metadata {
     "lens": "RF 24-70mm f/2.8L",
     "phone": null,
     "preview_img_one_url": "/files/urban-exploration/preview1.jpg",
-    "feature": true,
+    "featured": true,
     "category": "Street"
 }))]
 pub struct Album_Metadata {
@@ -51,7 +51,7 @@ pub struct Album_Metadata {
     pub lens: Option<String>,
     pub phone: Option<String>,
     pub preview_img_one_url: String,
-    pub feature: bool,
+    pub featured: bool,
     pub category: String,
 }
 
@@ -218,7 +218,7 @@ pub struct ProjectOperationResponse {
     "lens": "RF 24-70mm f/2.8L",
     "phone": null,
     "preview_img_one_url": "/files/paris-2025/preview.jpg",
-    "feature": true,
+    "featured": true,
     "category": "Street"
 }))]
 pub struct CreateAlbumRequest {
@@ -231,7 +231,7 @@ pub struct CreateAlbumRequest {
     pub lens: Option<String>,
     pub phone: Option<String>,
     pub preview_img_one_url: String,
-    pub feature: bool,
+    pub featured: bool,
     pub category: String,
 }
 
@@ -241,7 +241,7 @@ pub struct CreateAlbumRequest {
 #[schema(example = json!({
     "title": "Updated Album Title",
     "description": "Updated album description",
-    "feature": false
+    "featured": false
 }))]
 pub struct UpdateAlbumRequest {
     pub title: Option<String>,
@@ -252,7 +252,7 @@ pub struct UpdateAlbumRequest {
     pub lens: Option<String>,
     pub phone: Option<String>,
     pub preview_img_one_url: Option<String>,
-    pub feature: Option<bool>,
+    pub featured: Option<bool>,
     pub category: Option<String>,
 }
 
@@ -275,7 +275,7 @@ pub struct CreateAlbumWithFilesFormData {
     /// Album metadata as JSON string
     /// 
     /// This should contain all the album information as a JSON object
-    #[schema(example = r#"{"slug":"paris-2025","title":"Paris Street Photography 2025","description":"A collection of street photography","short_title":"Paris 2025","date":"2025-06-13","camera":"Canon EOS R5","lens":"RF 24-70mm f/2.8L","phone":null,"preview_img_one_url":"/files/paris-2025/preview.jpg","feature":true,"category":"Street"}"#)]
+    #[schema(example = r#"{"slug":"paris-2025","title":"Paris Street Photography 2025","description":"A collection of street photography","short_title":"Paris 2025","date":"2025-06-13","camera":"Canon EOS R5","lens":"RF 24-70mm f/2.8L","phone":null,"preview_img_one_url":"/files/paris-2025/preview.jpg","featured":true,"category":"Street"}"#)]
     pub album_data: String,
     
     /// Files to upload with the album
