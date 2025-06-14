@@ -4,6 +4,8 @@ A lightweight Rust server to manage and serve your portfolio content (developmen
 
 > This super lightweight server is designed to serve as a content provider for my portfolio website. Like this I can easily manage my photo hosting, the albums and development projects without needing a full CMS or complex backend. It provides a simple REST API to retrieve projects and albums, supports file uploads with automatic thumbnail generation, and uses PostgreSQL for data storage everything under secure and efficient conditions.
 
+> The file upload feature is not meant to stay, it was more done as a proof of concept. I'd like to implement my own solution for easy/free photo hosting with a proper UI in the future and all features you can expect from a a file "sharing" service. With the wish to make it self-hostable and open source, like so everyone will be able to use it without having also the "My portfolio" specific features.
+
 ## Features
 
 - **Simple REST API** to retrieve projects and albums
