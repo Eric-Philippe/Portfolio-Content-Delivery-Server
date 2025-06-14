@@ -60,13 +60,11 @@ pub struct Album_Metadata {
     "slug": "urban-exploration",
     "img_url": "/files/urban-exploration/street1.jpg",
     "caption": "Street art in downtown",
-    "img_path": "uploads/urban-exploration/street1.jpg"
 }))]
 pub struct Album_Content {
     pub slug: String,
     pub img_url: String,
     pub caption: String,
-    pub img_path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -313,8 +311,7 @@ pub struct AddPhotosToAlbumFormData {
     "added_photos": [
         {
             "img_url": "/files/paris-2025/photo_a1b2c3d4.jpg",
-            "caption": "Beautiful sunset view",
-            "img_path": "uploads/paris-2025/photo_a1b2c3d4.jpg"
+            "caption": "Beautiful sunset view"
         }
     ]
 }))]

@@ -11,7 +11,7 @@ INSERT INTO Album_Metadata (slug, title, description, short_title, date, camera,
 ('nature-walks', 'Nature Walks', 'Peaceful moments in nature', 'Nature', '2025-05-15', NULL, NULL, 'iPhone 15 Pro', '/files/nature-walks/preview1.jpg', false, 'Nature');
 
 -- Album content (adapt according to your actual images)
-INSERT INTO Album_Content (slug, img_url, caption, img_path) VALUES 
-('urban-exploration', '/files/urban-exploration/street1.jpg', 'Street art in downtown', 'uploads/urban-exploration/street1.jpg'),
-('urban-exploration', '/files/urban-exploration/building1.jpg', 'Modern architecture', 'uploads/urban-exploration/building1.jpg'),
-('nature-walks', '/files/nature-walks/forest1.jpg', 'Morning light through trees', 'uploads/nature-walks/forest1.jpg');
+INSERT INTO Album_Content (slug, img_url, caption) VALUES 
+('urban-exploration', '/files/urban-exploration/street1.jpg', 'Street art in downtown'),
+('urban-exploration', '/files/urban-exploration/building1.jpg', 'Modern architecture'),
+('nature-walks', '/files/nature-walks/forest1.jpg', 'Morning light through trees');

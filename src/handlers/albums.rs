@@ -293,14 +293,12 @@ pub async fn create_album_with_files(
         }
 
         let img_url = format!("/files/{}/{}", album_request.slug, unique_filename);
-        let img_path = format!("uploads/{}/{}", album_request.slug, unique_filename);
 
         // Add to album content
         let content = Album_Content {
             slug: album_request.slug.clone(),
             img_url: img_url.clone(),
             caption: format!("Photo from {}", filename),
-            img_path: img_path.clone(),
         };
 
         if let Err(e) = database::add_album_content(&state.db, &content).await {
@@ -569,14 +567,12 @@ pub async fn add_photos_to_album(
         }
 
         let img_url = format!("/files/{}/{}", slug, unique_filename);
-        let img_path = format!("uploads/{}/{}", slug, unique_filename);
 
         // Add to album content
         let content = Album_Content {
             slug: slug.clone(),
             img_url: img_url.clone(),
             caption: default_caption.clone(),
-            img_path: img_path.clone(),
         };
 
         if let Err(e) = database::add_album_content(&state.db, &content).await {

@@ -59,7 +59,6 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
             slug VARCHAR(255) NOT NULL,
             img_url VARCHAR(1000) NOT NULL,
             caption TEXT NOT NULL,
-            img_path VARCHAR(1000) NOT NULL,
             PRIMARY KEY (slug, img_url),
             FOREIGN KEY (slug) REFERENCES Album_Metadata(slug) ON DELETE CASCADE
         )
@@ -130,12 +129,11 @@ pub async fn init_database() -> Result<PgPool, sqlx::Error> {
         .await?;
 
         sqlx::query(
-            "INSERT INTO Album_Content (slug, img_url, caption, img_path) VALUES ($1, $2, $3, $4)"
+            "INSERT INTO Album_Content (slug, img_url, caption) VALUES ($1, $2, $3)"
         )
         .bind("urban-exploration")
         .bind("/files/urban-exploration/street1.jpg")
         .bind("Street art in downtown")
-        .bind("uploads/urban-exploration/street1.jpg")
         .execute(&pool)
         .await?;
 
@@ -255,7 +253,6 @@ pub async fn get_album_with_content(
                 slug: row.get("slug"),
                 img_url: row.get("img_url"),
                 caption: row.get("caption"),
-                img_path: row.get("img_path"),
             })
             .collect();
 
@@ -419,12 +416,11 @@ pub async fn add_album_content(
     content: &Album_Content,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "INSERT INTO Album_Content (slug, img_url, caption, img_path) VALUES ($1, $2, $3, $4)"
+        "INSERT INTO Album_Content (slug, img_url, caption) VALUES ($1, $2, $3)"
     )
     .bind(&content.slug)
     .bind(&content.img_url)
     .bind(&content.caption)
-    .bind(&content.img_path)
     .execute(pool)
     .await?;
 
